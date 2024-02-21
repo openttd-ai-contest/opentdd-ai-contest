@@ -1,13 +1,15 @@
 use std::string::String;
 use std::path::PathBuf;
+use std::vec::Vec;
 use std::fmt;
 
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    mongodb_url: String,
-    openttd_binary: PathBuf
+    pub mongodb_url: String,
+    pub openttd_directory: PathBuf,
+    pub player_names: Vec<String>
 }
 
 impl fmt::Display for Config {

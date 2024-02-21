@@ -1,2 +1,5 @@
 mongodb_url: localhost
-openttd_binary: ./openttd
+openttd_directory: /Users/ivanfefer/Projects/openttd-ai-contest/OpenTTD/build
+player_names:
+  - AdmiralAI
+  - SimpleAI
