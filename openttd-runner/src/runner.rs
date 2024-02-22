@@ -97,13 +97,13 @@ fn run_openttd(work_dir: &Path, player_names: Vec<String>) -> RunResult {
     let mut stdin = child.stdin.take().unwrap();
     let stderr = child.stderr.take().unwrap();
 
-    let script_log_parser: Regex = Regex::new(r"^dbg \[script\] \[(?P<script_id>\d+)\] (?P<log>.+)$").unwrap();
+    let script_log_parser: Regex = Regex::new(r"^dbg: \[script\] \[(?P<script_id>\d+)\] (?P<log>.+)$").unwrap();
     let lines = BufReader::new(stderr).lines();
-    for line_result in lines {
-        let line = line_result.unwrap();
+    for line in lines.map(|l| l.unwrap()) {
+        println!("{}", line);
         const SCRIPT_LOG_MARKER: &str = "dbg: [script]";
         if line.starts_with(SCRIPT_LOG_MARKER) {
-            let captures = script_log_parser.captures(&line)
+            let captures = script_log_parser.captures(line.as_str())
                 .expect(&std::format!("Unable to parse log line: {}", line));
             let script_id: usize = captures["script_id"].parse()
                 .expect(&std::format!("Unable to parse script_id from line: {}", line));
