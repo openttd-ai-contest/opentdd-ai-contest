@@ -14,6 +14,8 @@ use std::fs;
 use tempfile::TempDir;
 use fs_extra::dir;
 use ini::Ini;
+use mongodb::bson::Binary;
+use mongodb::bson::spec::BinarySubtype::Generic;
 use regex::Regex;
 use serde::Serialize;
 
@@ -21,9 +23,9 @@ use crate::help_parser;
 
 #[derive(Debug, Serialize)]
 pub struct RunResult {
-    player_results: Vec<PlayerResult>,
-    savefile: Vec<u8>,
-    log: Vec<String>,
+    pub player_results: Vec<PlayerResult>,
+    pub savefile: Binary,
+    pub log: Vec<String>,
 }
 
 impl RunResult {
@@ -41,7 +43,7 @@ impl RunResult {
         }
         return RunResult{
             player_results,
-            savefile: Vec::new(),
+            savefile: Binary{subtype: Generic, bytes: Vec::new()},
             log: Vec::with_capacity(1024),
         };
     }
@@ -148,7 +150,7 @@ fn run_openttd(work_dir: &Path, player_names: Vec<String>) -> RunResult {
         result.log.push(line);
     }
     child.wait().expect("OpenTTD binary didn't terminate successfully");
-    result.savefile = read_latest_save(work_dir);
+    result.savefile.bytes = read_latest_save(work_dir);
     return result;
 }
 
