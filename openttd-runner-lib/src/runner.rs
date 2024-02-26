@@ -11,6 +11,7 @@ use std::process::Stdio;
 use std::convert::TryFrom;
 use std::fs;
 
+use rand::{Rng, thread_rng};
 use tempfile::TempDir;
 use fs_extra::dir;
 use ini::Ini;
@@ -166,7 +167,7 @@ fn spawn_openttd_process(work_dir: &Path) -> Child {
         .args(["-d", "script=4"])
         .args(["-t", "1975"])
         .args(["-G", "1"])
-        .args(["-p", "12345"]) // TODO generate password
+        .args(["-p", &random_password()])
         .arg("-c")
         .arg(&config_path.into_os_string())
         .current_dir(work_dir)
@@ -175,6 +176,12 @@ fn spawn_openttd_process(work_dir: &Path) -> Child {
         .spawn()
         .expect("Failed to run openttd binary");
 }
+
+fn random_password() -> String {
+    let mut rng = thread_rng();
+    return (0..256).map(|_| char::from(rng.gen_range(65..91))).collect();
+}
+
 fn split_corporation_name(log: &str) -> (&str, &str) {
     const NAME_MARKER: &str = ",name=";
     return log.split_once(NAME_MARKER)
@@ -185,7 +192,7 @@ fn split_date_and_parse_stats(log: &str) -> (String, HashMap<String, i64>) {
     let mut values = log.split(",");
 
     let (key, date) = split_value(values.next().unwrap());
-    assert!(key == "date", "Unable to parse logger line: {}", log);
+    assert_eq!(key, "date", "Unable to parse logger line: {}", log);
 
     return (date.to_string(), values
         .map(split_value)
