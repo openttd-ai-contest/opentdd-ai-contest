@@ -6,8 +6,14 @@ use std::fmt;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
+pub struct DaoConfig {
+    pub mongodb_uri: String,
+    pub database: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Config {
-    pub mongodb_url: String,
+    pub dao: DaoConfig,
     pub openttd_directory: PathBuf,
     pub player_names: Vec<String>
 }

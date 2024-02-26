@@ -15,7 +15,11 @@ use tempfile::TempDir;
 use fs_extra::dir;
 use ini::Ini;
 use regex::Regex;
+use serde::Serialize;
 
+use crate::help_parser;
+
+#[derive(Debug, Serialize)]
 pub struct RunResult {
     player_results: Vec<PlayerResult>,
     savefile: Vec<u8>,
@@ -23,10 +27,12 @@ pub struct RunResult {
 }
 
 impl RunResult {
-    pub fn new(player_names: Vec<String>) -> RunResult {
+    pub fn new(openttd_dir: &Path, player_names: Vec<String>) -> RunResult {
+        let player_version_by_name = get_player_version_by_name(openttd_dir);
         let mut player_results = Vec::with_capacity(player_names.len());
         for player_name in player_names {
             player_results.push(PlayerResult{
+                version: *player_version_by_name.get(&player_name).unwrap(),
                 name: player_name,
                 corporation_name: String::new(),
                 log: Vec::with_capacity(1024),
@@ -34,15 +40,17 @@ impl RunResult {
             })
         }
         return RunResult{
-            player_results: player_results,
+            player_results,
             savefile: Vec::new(),
             log: Vec::with_capacity(1024),
         };
     }
 }
 
+#[derive(Debug, Serialize)]
 pub struct PlayerResult {
     name: String,
+    version: i64,
     corporation_name: String,
     log: Vec<String>,
     stats: Vec<(String, HashMap<String, i64>)>
@@ -92,12 +100,12 @@ fn extend_config(config_file: &Path, player_names: &Vec<String>) {
 }
 
 fn run_openttd(work_dir: &Path, player_names: Vec<String>) -> RunResult {
+    let mut result = RunResult::new(work_dir, player_names);
     let mut child = spawn_openttd_process(work_dir);
-    let mut result = RunResult::new(player_names);
     let mut stdin = child.stdin.take().unwrap();
     let stderr = child.stderr.take().unwrap();
 
-    let script_log_parser: Regex = Regex::new(r"^dbg: \[script\] \[(?P<script_id>\d+)\] (?P<log>.+)$").unwrap();
+    let script_log_parser: Regex = Regex::new(r"^dbg: \[script] \[(?P<script_id>\d+)] (?P<log>.+)$").unwrap();
     let lines = BufReader::new(stderr).lines();
     for line in lines.map(|l| l.unwrap()) {
         println!("{}", line);
@@ -126,10 +134,13 @@ fn run_openttd(work_dir: &Path, player_names: Vec<String>) -> RunResult {
                     if player_result.corporation_name.is_empty() {
                         player_result.corporation_name = corporation_name.to_string();
                     } else {
-                        assert!(
-                            player_result.corporation_name == corporation_name,
+                        assert_eq!(
+                            player_result.corporation_name,
+                            corporation_name,
                             "Player {} corporation name changed from {} to {}",
-                            cid, player_result.corporation_name, corporation_name);
+                            cid,
+                            player_result.corporation_name,
+                            corporation_name);
                     }
                 }
             }
@@ -141,6 +152,11 @@ fn run_openttd(work_dir: &Path, player_names: Vec<String>) -> RunResult {
     return result;
 }
 
+fn get_player_version_by_name(work_dir: &Path) -> HashMap<String, i64>{
+    return help_parser::parse_ai_list(work_dir).iter()
+        .map(|ai| (ai.name.clone(), ai.version))
+        .collect();
+}
 fn spawn_openttd_process(work_dir: &Path) -> Child {
     let config_path = fs::canonicalize(work_dir.join("openttd.cfg")).unwrap();
     return Command::new("./openttd")
