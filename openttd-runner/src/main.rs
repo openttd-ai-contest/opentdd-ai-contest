@@ -2,12 +2,9 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use crate::runner::run_game;
-
+use openttd_runner_lib::runner::run_game;
+use openttd_runner_lib::dao::Dao;
 pub mod config;
-pub mod dao;
-pub mod runner;
-pub mod help_parser;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -22,7 +19,7 @@ fn main() {
     let config = crate::config::parse(cli.config);
     println!("Parsed config: {}", config);
 
-    let dao = crate::dao::Dao::new(&config.dao.mongodb_uri, &config.dao.database);
+    let dao = Dao::new(&config.dao.mongodb_uri, &config.dao.database);
     let result = run_game(config.openttd_directory.as_path(), config.player_names);
     dao.insert_run_result(result);
 }
