@@ -1,0 +1,1060 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "OpenTTD Content API",
+    "version": "1.0.0",
+    "title": "OpenTTD Content API",
+    "license": {
+      "name": "GPL-2.0",
+      "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "discover",
+      "description": "Operations to discover and list packages"
+    },
+    {
+      "name": "update",
+      "description": "Operations to update your packages"
+    },
+    {
+      "name": "new",
+      "description": "Operations to upload a new package"
+    }
+  ],
+  "paths": {
+    "/user/authorize": {
+      "get": {
+        "summary": "Default Oauth2 PKCE flow. Response depends on \"audience\"",
+        "tags": [
+          "user"
+        ],
+        "responses": {
+          "400": {
+            "description": "The request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/logout": {
+      "get": {
+        "summary": "Logout of the Content API.",
+        "description": "Your bearer token will no longer be valid.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "user"
+        ],
+        "responses": {
+          "204": {
+            "description": "You are now logged out."
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "summary": "Get information about yourself",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "user"
+        ],
+        "responses": {
+          "200": {
+            "description": "Information about yourself",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "display-name": {
+                      "type": "string",
+                      "example": "Librarian"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/config/user-audiences": {
+      "get": {
+        "summary": "List of alowed audiences to login with.",
+        "tags": [
+          "config"
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing of audience.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "example": "github"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Login via GitHub"
+                      },
+                      "settings-url": {
+                        "type": "string",
+                        "example": "https://github.com/settings/connections/applications/33708ceda9b99e28bc5d"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/config/licenses": {
+      "get": {
+        "summary": "List the known licenses.",
+        "tags": [
+          "config"
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing of licenses.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "example": "GPL v2"
+                      },
+                      "deprecated": {
+                        "type": "boolean",
+                        "example": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/config/branches": {
+      "get": {
+        "summary": "List the known branches.",
+        "tags": [
+          "config"
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing of branches.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "example": "master"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Official OpenTTD"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/package/self": {
+      "get": {
+        "summary": "Get listing of the packages you are (one of) the author(s) of.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "discover"
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing of packages.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Package"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/package/{content-type}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentType"
+        },
+        {
+          "in": "query",
+          "name": "since",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": "Package that are modifed since this date. Used to fetch updates of this endpoint after initial call."
+        }
+      ],
+      "get": {
+        "summary": "Get listing of all the packages with this Content Type.",
+        "description": "The listing will contain only versions that are available for new games.\nthe versions available for savegames only can be found per unique-id.\n",
+        "tags": [
+          "discover"
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing of packages with this Content Type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Package"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The specified ContentType was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/package/{content-type}/{unique-id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentType"
+        },
+        {
+          "$ref": "#/components/parameters/UniqueID"
+        }
+      ],
+      "get": {
+        "summary": "Get information about a single package.",
+        "description": "This contains the versions for new games and available for savegames only.\n",
+        "tags": [
+          "discover"
+        ],
+        "responses": {
+          "200": {
+            "description": "Information of the packages.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Package"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The specified UniqueID or ContentType was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A package with the specified UniqueID and ContentType was not found."
+          }
+        }
+      },
+      "put": {
+        "summary": "Update the global information of a single package.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "update"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Package"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Update processed successfully"
+          },
+          "400": {
+            "description": "The specified UniqueID, ContentType or request-body was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "A package with the specified UniqueID and ContentType was not found or you are not (one of) the author(s)."
+          }
+        }
+      }
+    },
+    "/package/{content-type}/{unique-id}/{upload-date}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentType"
+        },
+        {
+          "$ref": "#/components/parameters/UniqueID"
+        },
+        {
+          "$ref": "#/components/parameters/UploadDate"
+        }
+      ],
+      "get": {
+        "summary": "Get information about a single version of a package. The key is \"upload-date\", as that is considered unique.",
+        "tags": [
+          "discover"
+        ],
+        "responses": {
+          "200": {
+            "description": "Information of the version.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Version"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The specified UniqueID, ContentType, or UploadDate was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A package with the specified UniqueID, ContentType, and UploadDate was not found."
+          }
+        }
+      },
+      "put": {
+        "summary": "Update the information of a single version",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "update"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Version"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Update processed successfully"
+          },
+          "400": {
+            "description": "The specified UniqueID, ContentType, UploadDate, or request-body was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "A package with the specified UniqueID, ContentType, and UploadDate was not found or you are not (one of) the author(s)."
+          }
+        }
+      }
+    },
+    "/new-package": {
+      "post": {
+        "summary": "Start with the creation of a new package or version.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "new"
+        ],
+        "responses": {
+          "201": {
+            "description": "Creation of new package started. Files should be uploaded via tus with the given token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "upload-token": {
+                      "$ref": "#/components/schemas/UploadToken"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/new-package/{upload-token}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/UploadToken"
+        }
+      ],
+      "get": {
+        "summary": "Get information about the new upload.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "new"
+        ],
+        "responses": {
+          "200": {
+            "description": "Information of the new upload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The specified token was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "A package with the specified token was not found."
+          }
+        }
+      },
+      "put": {
+        "summary": "Update the information of a new upload",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "new"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Version"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "license": {
+                        "readOnly": false
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Update processed successfully"
+          },
+          "400": {
+            "description": "The specified token or request-body was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "A package with the specified token was not found."
+          }
+        }
+      }
+    },
+    "/new-package/{upload-token}/{file-uuid}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/UploadToken"
+        },
+        {
+          "$ref": "#/components/parameters/FileUuid"
+        }
+      ],
+      "delete": {
+        "summary": "Delete an uploaded file.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "new"
+        ],
+        "responses": {
+          "204": {
+            "description": "File deleted successful."
+          },
+          "400": {
+            "description": "The specified token was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "A package with the specified token was not found."
+          }
+        }
+      }
+    },
+    "/new-package/{upload-token}/publish": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/UploadToken"
+        }
+      ],
+      "post": {
+        "summary": "Publish the new upload.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "new"
+        ],
+        "responses": {
+          "201": {
+            "description": "The new package/version was published successful.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Version"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The specified token was invalid or the new package does not validate (in this case the GET request will show you why).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "A package with the specified token was not found."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "This request requires valid authentication.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "ContentType": {
+        "name": "content-type",
+        "in": "path",
+        "description": "Content Type of package.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/ContentType"
+        }
+      },
+      "UniqueID": {
+        "name": "unique-id",
+        "in": "path",
+        "description": "Unique ID of package (lowercase).",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UniqueID"
+        }
+      },
+      "UploadDate": {
+        "name": "upload-date",
+        "in": "path",
+        "description": "Upload Date of the version (in ISO-8601).",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UploadDate"
+        }
+      },
+      "UploadToken": {
+        "name": "upload-token",
+        "in": "path",
+        "description": "Token of the new upload.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UploadToken"
+        }
+      },
+      "FileUuid": {
+        "name": "file-uuid",
+        "in": "path",
+        "description": "File UUID of the upload",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/FileUuid"
+        }
+      }
+    },
+    "schemas": {
+      "ContentType": {
+        "type": "string",
+        "example": "ai",
+        "enum": [
+          "ai",
+          "ai-library",
+          "base-graphics",
+          "base-music",
+          "base-sounds",
+          "game-script",
+          "game-script-library",
+          "heightmap",
+          "newgrf",
+          "scenario"
+        ],
+        "readOnly": true
+      },
+      "UniqueID": {
+        "type": "string",
+        "example": "aabbccdd",
+        "minLength": 8,
+        "maxLength": 8,
+        "readOnly": true
+      },
+      "UploadDate": {
+        "type": "string",
+        "format": "date-time",
+        "example": "2020-02-02T12:00:00+00:00",
+        "readOnly": true
+      },
+      "UploadToken": {
+        "type": "string",
+        "example": "1234-1234-1234",
+        "readOnly": true
+      },
+      "FileUuid": {
+        "type": "string",
+        "example": "1234-1234-1234",
+        "readOnly": true
+      },
+      "Author": {
+        "type": "object",
+        "properties": {
+          "display-name": {
+            "type": "string",
+            "example": "OpenTTD"
+          }
+        }
+      },
+      "Dependency": {
+        "type": "object",
+        "properties": {
+          "content-type": {
+            "$ref": "#/components/schemas/ContentType"
+          },
+          "unique-id": {
+            "$ref": "#/components/schemas/UniqueID"
+          },
+          "md5sum-partial": {
+            "type": "string",
+            "example": "abcdef12"
+          }
+        }
+      },
+      "Compatibility": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "master"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": ">= 1.7.0"
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "License": {
+        "type": "string",
+        "example": "GPL v2"
+      },
+      "Global": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "My Package"
+          },
+          "description": {
+            "type": "string",
+            "example": "Description of My Package"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://www.openttd.org"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 32,
+              "example": "boats"
+            }
+          }
+        }
+      },
+      "VersionMinimized": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Global"
+          },
+          {
+            "type": "object",
+            "required": [
+              "upload-date"
+            ],
+            "properties": {
+              "version": {
+                "type": "string",
+                "example": "v0.1-beta2"
+              },
+              "license": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/License"
+                  },
+                  {
+                    "readOnly": true
+                  }
+                ]
+              },
+              "upload-date": {
+                "$ref": "#/components/schemas/UploadDate"
+              },
+              "md5sum-partial": {
+                "type": "string",
+                "minLength": 8,
+                "maxLength": 8,
+                "example": "ABCDABCD",
+                "readOnly": true
+              },
+              "filesize": {
+                "type": "integer",
+                "example": 1411,
+                "readOnly": true
+              },
+              "availability": {
+                "type": "string",
+                "enum": [
+                  "savegames-only",
+                  "new-games"
+                ],
+                "example": "new-games",
+                "readOnly": true
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Dependency"
+                }
+              },
+              "compatibility": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Compatibility"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Version": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/VersionMinimized"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content-type": {
+                "$ref": "#/components/schemas/ContentType"
+              },
+              "unique-id": {
+                "$ref": "#/components/schemas/UniqueID"
+              }
+            }
+          }
+        ]
+      },
+      "UploadStatus": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Version"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "$ref": "#/components/schemas/FileUuid"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "example": "My Cool Trains.grf"
+                    },
+                    "filesize": {
+                      "type": "string",
+                      "example": 1144
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "example": "No GRFID found"
+                      }
+                    }
+                  }
+                }
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": "There is a very similar named upload with another unique-id. Are you sure your unique-id is correct?"
+                }
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": "License set to custom, but no license file uploaded."
+                }
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "OK",
+                  "Warnings",
+                  "Errors"
+                ],
+                "example": "OK"
+              }
+            }
+          }
+        ]
+      },
+      "Package": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Global"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content-type",
+              "unique-id"
+            ],
+            "properties": {
+              "content-type": {
+                "$ref": "#/components/schemas/ContentType"
+              },
+              "unique-id": {
+                "$ref": "#/components/schemas/UniqueID"
+              },
+              "archived": {
+                "type": "boolean",
+                "default": false,
+                "example": true,
+                "readOnly": true
+              },
+              "replaced-by": {
+                "type": "object",
+                "properties": {
+                  "unique-id": {
+                    "$ref": "#/components/schemas/UniqueID"
+                  }
+                },
+                "readOnly": true
+              },
+              "authors": {
+                "type": "array",
+                "readOnly": true,
+                "items": {
+                  "$ref": "#/components/schemas/Author"
+                }
+              },
+              "versions": {
+                "type": "array",
+                "readOnly": true,
+                "items": {
+                  "$ref": "#/components/schemas/VersionMinimized"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

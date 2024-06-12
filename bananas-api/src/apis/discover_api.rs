@@ -10,8 +10,8 @@
 
 
 use reqwest;
-
-use crate::apis::ResponseContent;
+use serde::{Deserialize, Serialize};
+use crate::{apis::ResponseContent, models};
 use super::{Error, configuration};
 
 
@@ -19,7 +19,7 @@ use super::{Error, configuration};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PackageContentTypeGetError {
-    Status400(crate::models::Error),
+    Status400(models::Error),
     UnknownValue(serde_json::Value),
 }
 
@@ -27,7 +27,7 @@ pub enum PackageContentTypeGetError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PackageContentTypeUniqueIdGetError {
-    Status400(crate::models::Error),
+    Status400(models::Error),
     Status404(),
     UnknownValue(serde_json::Value),
 }
@@ -36,7 +36,7 @@ pub enum PackageContentTypeUniqueIdGetError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PackageContentTypeUniqueIdUploadDateGetError {
-    Status400(crate::models::Error),
+    Status400(models::Error),
     Status404(),
     UnknownValue(serde_json::Value),
 }
@@ -45,18 +45,18 @@ pub enum PackageContentTypeUniqueIdUploadDateGetError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PackageSelfGetError {
-    Status401(crate::models::Error),
+    Status401(models::Error),
     UnknownValue(serde_json::Value),
 }
 
 
 /// The listing will contain only versions that are available for new games. the versions available for savegames only can be found per unique-id. 
-pub async fn package_content_type_get(configuration: &configuration::Configuration, content_type: ContentType, since: Option<String>) -> Result<Vec<crate::models::Package>, Error<PackageContentTypeGetError>> {
+pub async fn package_content_type_get(configuration: &configuration::Configuration, content_type: models::ContentType, since: Option<String>) -> Result<Vec<models::Package>, Error<PackageContentTypeGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/package/{content-type}", local_var_configuration.base_path, content-type=content_type.to_string());
+    let local_var_uri_str = format!("{}/package/{content_type}", local_var_configuration.base_path, content_type=content_type.to_string());
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::GET, local_var_uri_str.as_str());
 
     if let Some(ref local_var_str) = since {
@@ -82,12 +82,12 @@ pub async fn package_content_type_get(configuration: &configuration::Configurati
 }
 
 /// This contains the versions for new games and available for savegames only. 
-pub async fn package_content_type_unique_id_get(configuration: &configuration::Configuration, content_type: ContentType, unique_id: &str) -> Result<crate::models::Package, Error<PackageContentTypeUniqueIdGetError>> {
+pub async fn package_content_type_unique_id_get(configuration: &configuration::Configuration, content_type: models::ContentType, unique_id: &str) -> Result<models::Package, Error<PackageContentTypeUniqueIdGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/package/{content-type}/{unique-id}", local_var_configuration.base_path, content-type=content_type.to_string(), unique-id=crate::apis::urlencode(unique_id));
+    let local_var_uri_str = format!("{}/package/{content_type}/{unique_id}", local_var_configuration.base_path, content_type=content_type.to_string(), unique_id=crate::apis::urlencode(unique_id));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::GET, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
@@ -109,12 +109,12 @@ pub async fn package_content_type_unique_id_get(configuration: &configuration::C
     }
 }
 
-pub async fn package_content_type_unique_id_upload_date_get(configuration: &configuration::Configuration, content_type: ContentType, unique_id: &str, upload_date: String) -> Result<crate::models::Version, Error<PackageContentTypeUniqueIdUploadDateGetError>> {
+pub async fn package_content_type_unique_id_upload_date_get(configuration: &configuration::Configuration, content_type: models::ContentType, unique_id: &str, upload_date: String) -> Result<models::Version, Error<PackageContentTypeUniqueIdUploadDateGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/package/{content-type}/{unique-id}/{upload-date}", local_var_configuration.base_path, content-type=content_type.to_string(), unique-id=crate::apis::urlencode(unique_id), upload-date=upload_date);
+    let local_var_uri_str = format!("{}/package/{content_type}/{unique_id}/{upload_date}", local_var_configuration.base_path, content_type=content_type.to_string(), unique_id=crate::apis::urlencode(unique_id), upload_date=upload_date);
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::GET, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
@@ -136,7 +136,7 @@ pub async fn package_content_type_unique_id_upload_date_get(configuration: &conf
     }
 }
 
-pub async fn package_self_get(configuration: &configuration::Configuration, ) -> Result<Vec<crate::models::Package>, Error<PackageSelfGetError>> {
+pub async fn package_self_get(configuration: &configuration::Configuration, ) -> Result<Vec<models::Package>, Error<PackageSelfGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;

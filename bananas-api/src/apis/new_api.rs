@@ -10,8 +10,8 @@
 
 
 use reqwest;
-
-use crate::apis::ResponseContent;
+use serde::{Deserialize, Serialize};
+use crate::{apis::ResponseContent, models};
 use super::{Error, configuration};
 
 
@@ -19,7 +19,7 @@ use super::{Error, configuration};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum NewPackagePostError {
-    Status401(crate::models::Error),
+    Status401(models::Error),
     UnknownValue(serde_json::Value),
 }
 
@@ -27,8 +27,8 @@ pub enum NewPackagePostError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum NewPackageUploadTokenFileUuidDeleteError {
-    Status400(crate::models::Error),
-    Status401(crate::models::Error),
+    Status400(models::Error),
+    Status401(models::Error),
     Status404(),
     UnknownValue(serde_json::Value),
 }
@@ -37,8 +37,8 @@ pub enum NewPackageUploadTokenFileUuidDeleteError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum NewPackageUploadTokenGetError {
-    Status400(crate::models::Error),
-    Status401(crate::models::Error),
+    Status400(models::Error),
+    Status401(models::Error),
     Status404(),
     UnknownValue(serde_json::Value),
 }
@@ -47,8 +47,8 @@ pub enum NewPackageUploadTokenGetError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum NewPackageUploadTokenPublishPostError {
-    Status400(crate::models::Error),
-    Status401(crate::models::Error),
+    Status400(models::Error),
+    Status401(models::Error),
     Status404(),
     UnknownValue(serde_json::Value),
 }
@@ -57,14 +57,14 @@ pub enum NewPackageUploadTokenPublishPostError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum NewPackageUploadTokenPutError {
-    Status400(crate::models::Error),
-    Status401(crate::models::Error),
+    Status400(models::Error),
+    Status401(models::Error),
     Status404(),
     UnknownValue(serde_json::Value),
 }
 
 
-pub async fn new_package_post(configuration: &configuration::Configuration, ) -> Result<crate::models::NewPackagePost201Response, Error<NewPackagePostError>> {
+pub async fn new_package_post(configuration: &configuration::Configuration, ) -> Result<models::NewPackagePost201Response, Error<NewPackagePostError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -99,7 +99,7 @@ pub async fn new_package_upload_token_file_uuid_delete(configuration: &configura
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/new-package/{upload-token}/{file-uuid}", local_var_configuration.base_path, upload-token=crate::apis::urlencode(upload_token), file-uuid=crate::apis::urlencode(file_uuid));
+    let local_var_uri_str = format!("{}/new-package/{upload_token}/{file_uuid}", local_var_configuration.base_path, upload_token=crate::apis::urlencode(upload_token), file_uuid=crate::apis::urlencode(file_uuid));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::DELETE, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
@@ -124,12 +124,12 @@ pub async fn new_package_upload_token_file_uuid_delete(configuration: &configura
     }
 }
 
-pub async fn new_package_upload_token_get(configuration: &configuration::Configuration, upload_token: &str) -> Result<crate::models::UploadStatus, Error<NewPackageUploadTokenGetError>> {
+pub async fn new_package_upload_token_get(configuration: &configuration::Configuration, upload_token: &str) -> Result<models::UploadStatus, Error<NewPackageUploadTokenGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/new-package/{upload-token}", local_var_configuration.base_path, upload-token=crate::apis::urlencode(upload_token));
+    let local_var_uri_str = format!("{}/new-package/{upload_token}", local_var_configuration.base_path, upload_token=crate::apis::urlencode(upload_token));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::GET, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
@@ -154,12 +154,12 @@ pub async fn new_package_upload_token_get(configuration: &configuration::Configu
     }
 }
 
-pub async fn new_package_upload_token_publish_post(configuration: &configuration::Configuration, upload_token: &str) -> Result<crate::models::Version, Error<NewPackageUploadTokenPublishPostError>> {
+pub async fn new_package_upload_token_publish_post(configuration: &configuration::Configuration, upload_token: &str) -> Result<models::Version, Error<NewPackageUploadTokenPublishPostError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/new-package/{upload-token}/publish", local_var_configuration.base_path, upload-token=crate::apis::urlencode(upload_token));
+    let local_var_uri_str = format!("{}/new-package/{upload_token}/publish", local_var_configuration.base_path, upload_token=crate::apis::urlencode(upload_token));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::POST, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
@@ -184,12 +184,12 @@ pub async fn new_package_upload_token_publish_post(configuration: &configuration
     }
 }
 
-pub async fn new_package_upload_token_put(configuration: &configuration::Configuration, upload_token: &str, new_package_upload_token_put_request: Option<crate::models::NewPackageUploadTokenPutRequest>) -> Result<(), Error<NewPackageUploadTokenPutError>> {
+pub async fn new_package_upload_token_put(configuration: &configuration::Configuration, upload_token: &str, new_package_upload_token_put_request: Option<models::NewPackageUploadTokenPutRequest>) -> Result<(), Error<NewPackageUploadTokenPutError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/new-package/{upload-token}", local_var_configuration.base_path, upload-token=crate::apis::urlencode(upload_token));
+    let local_var_uri_str = format!("{}/new-package/{upload_token}", local_var_configuration.base_path, upload_token=crate::apis::urlencode(upload_token));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::PUT, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {

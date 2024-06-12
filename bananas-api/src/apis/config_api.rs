@@ -10,8 +10,8 @@
 
 
 use reqwest;
-
-use crate::apis::ResponseContent;
+use serde::{Deserialize, Serialize};
+use crate::{apis::ResponseContent, models};
 use super::{Error, configuration};
 
 
@@ -37,7 +37,7 @@ pub enum ConfigUserAudiencesGetError {
 }
 
 
-pub async fn config_branches_get(configuration: &configuration::Configuration, ) -> Result<Vec<crate::models::ConfigBranchesGet200ResponseInner>, Error<ConfigBranchesGetError>> {
+pub async fn config_branches_get(configuration: &configuration::Configuration, ) -> Result<Vec<models::ConfigBranchesGet200ResponseInner>, Error<ConfigBranchesGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -64,7 +64,7 @@ pub async fn config_branches_get(configuration: &configuration::Configuration, )
     }
 }
 
-pub async fn config_licenses_get(configuration: &configuration::Configuration, ) -> Result<Vec<crate::models::ConfigLicensesGet200ResponseInner>, Error<ConfigLicensesGetError>> {
+pub async fn config_licenses_get(configuration: &configuration::Configuration, ) -> Result<Vec<models::ConfigLicensesGet200ResponseInner>, Error<ConfigLicensesGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -91,7 +91,7 @@ pub async fn config_licenses_get(configuration: &configuration::Configuration, )
     }
 }
 
-pub async fn config_user_audiences_get(configuration: &configuration::Configuration, ) -> Result<Vec<crate::models::ConfigUserAudiencesGet200ResponseInner>, Error<ConfigUserAudiencesGetError>> {
+pub async fn config_user_audiences_get(configuration: &configuration::Configuration, ) -> Result<Vec<models::ConfigUserAudiencesGet200ResponseInner>, Error<ConfigUserAudiencesGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;

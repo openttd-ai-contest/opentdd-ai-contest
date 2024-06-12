@@ -10,8 +10,8 @@
 
 
 use reqwest;
-
-use crate::apis::ResponseContent;
+use serde::{Deserialize, Serialize};
+use crate::{apis::ResponseContent, models};
 use super::{Error, configuration};
 
 
@@ -19,7 +19,7 @@ use super::{Error, configuration};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum UserAuthorizeGetError {
-    Status400(crate::models::Error),
+    Status400(models::Error),
     UnknownValue(serde_json::Value),
 }
 
@@ -27,7 +27,7 @@ pub enum UserAuthorizeGetError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum UserGetError {
-    Status401(crate::models::Error),
+    Status401(models::Error),
     UnknownValue(serde_json::Value),
 }
 
@@ -35,7 +35,7 @@ pub enum UserGetError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum UserLogoutGetError {
-    Status401(crate::models::Error),
+    Status401(models::Error),
     UnknownValue(serde_json::Value),
 }
 
@@ -67,7 +67,7 @@ pub async fn user_authorize_get(configuration: &configuration::Configuration, ) 
     }
 }
 
-pub async fn user_get(configuration: &configuration::Configuration, ) -> Result<crate::models::UserGet200Response, Error<UserGetError>> {
+pub async fn user_get(configuration: &configuration::Configuration, ) -> Result<models::UserGet200Response, Error<UserGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;

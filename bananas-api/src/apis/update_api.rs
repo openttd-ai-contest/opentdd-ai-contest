@@ -10,8 +10,8 @@
 
 
 use reqwest;
-
-use crate::apis::ResponseContent;
+use serde::{Deserialize, Serialize};
+use crate::{apis::ResponseContent, models};
 use super::{Error, configuration};
 
 
@@ -19,8 +19,8 @@ use super::{Error, configuration};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PackageContentTypeUniqueIdPutError {
-    Status400(crate::models::Error),
-    Status401(crate::models::Error),
+    Status400(models::Error),
+    Status401(models::Error),
     Status404(),
     UnknownValue(serde_json::Value),
 }
@@ -29,19 +29,19 @@ pub enum PackageContentTypeUniqueIdPutError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PackageContentTypeUniqueIdUploadDatePutError {
-    Status400(crate::models::Error),
-    Status401(crate::models::Error),
+    Status400(models::Error),
+    Status401(models::Error),
     Status404(),
     UnknownValue(serde_json::Value),
 }
 
 
-pub async fn package_content_type_unique_id_put(configuration: &configuration::Configuration, content_type: ContentType, unique_id: &str, package: Option<crate::models::Package>) -> Result<(), Error<PackageContentTypeUniqueIdPutError>> {
+pub async fn package_content_type_unique_id_put(configuration: &configuration::Configuration, content_type: models::ContentType, unique_id: &str, package: Option<models::Package>) -> Result<(), Error<PackageContentTypeUniqueIdPutError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/package/{content-type}/{unique-id}", local_var_configuration.base_path, content-type=content_type.to_string(), unique-id=crate::apis::urlencode(unique_id));
+    let local_var_uri_str = format!("{}/package/{content_type}/{unique_id}", local_var_configuration.base_path, content_type=content_type.to_string(), unique_id=crate::apis::urlencode(unique_id));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::PUT, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
@@ -67,12 +67,12 @@ pub async fn package_content_type_unique_id_put(configuration: &configuration::C
     }
 }
 
-pub async fn package_content_type_unique_id_upload_date_put(configuration: &configuration::Configuration, content_type: ContentType, unique_id: &str, upload_date: String, version: Option<crate::models::Version>) -> Result<(), Error<PackageContentTypeUniqueIdUploadDatePutError>> {
+pub async fn package_content_type_unique_id_upload_date_put(configuration: &configuration::Configuration, content_type: models::ContentType, unique_id: &str, upload_date: String, version: Option<models::Version>) -> Result<(), Error<PackageContentTypeUniqueIdUploadDatePutError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/package/{content-type}/{unique-id}/{upload-date}", local_var_configuration.base_path, content-type=content_type.to_string(), unique-id=crate::apis::urlencode(unique_id), upload-date=upload_date);
+    let local_var_uri_str = format!("{}/package/{content_type}/{unique_id}/{upload_date}", local_var_configuration.base_path, content_type=content_type.to_string(), unique_id=crate::apis::urlencode(unique_id), upload_date=upload_date);
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::PUT, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
