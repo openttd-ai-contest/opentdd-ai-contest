@@ -34,5 +34,3 @@ pub mod version;
 pub use self::version::Version;
 pub mod version_minimized;
 pub use self::version_minimized::VersionMinimized;
-pub mod version_minimized_all_of_license;
-pub use self::version_minimized_all_of_license::VersionMinimizedAllOfLicense;

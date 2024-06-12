@@ -1,4 +1,3 @@
-use std::fmt::Debug;
 use std::path::PathBuf;
 use clap::Parser;
 use bananas_api::apis::configuration::Configuration;

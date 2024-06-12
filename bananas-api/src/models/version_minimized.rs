@@ -24,7 +24,7 @@ pub struct VersionMinimized {
     #[serde(rename = "version", skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
     #[serde(rename = "license", skip_serializing_if = "Option::is_none")]
-    pub license: Option<Box<models::VersionMinimizedAllOfLicense>>,
+    pub license: Option<String>,
     #[serde(rename = "upload-date")]
     pub upload_date: String,
     #[serde(rename = "md5sum-partial", skip_serializing_if = "Option::is_none")]
