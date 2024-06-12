@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "bananas-api",
     "openttd-runner-lib",
-    "openttd-runner"
+    "openttd-runner", "ai-downloader",
 ]
