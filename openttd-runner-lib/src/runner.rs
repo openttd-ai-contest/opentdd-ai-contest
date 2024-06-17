@@ -1,26 +1,27 @@
+use std::collections::HashMap;
+use std::convert::TryFrom;
+use std::fs;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 use std::io::Write;
 use std::path::Path;
-use std::vec::Vec;
-use std::collections::HashMap;
-use std::process::Command;
 use std::process::Child;
+use std::process::Command;
 use std::process::Stdio;
-use std::convert::TryFrom;
-use std::fs;
+use std::vec::Vec;
 
-use rand::{Rng, thread_rng};
-use tempfile::TempDir;
 use fs_extra::dir;
 use ini::Ini;
 use mongodb::bson::Binary;
 use mongodb::bson::spec::BinarySubtype::Generic;
 use regex::Regex;
 use serde::Serialize;
+use tempfile::TempDir;
 
+use crate::command_sender::send_command;
 use crate::help_parser;
+use crate::random::random_password;
 
 #[derive(Debug, Serialize)]
 pub struct RunResult {
@@ -106,12 +107,15 @@ fn run_openttd(work_dir: &Path, player_names: Vec<String>) -> RunResult {
     let mut result = RunResult::new(work_dir, player_names);
     let mut child = spawn_openttd_process(work_dir);
     let mut stdin = child.stdin.take().unwrap();
+    let mut stdout_reader = BufReader::new(child.stdout.take().unwrap()).lines();
     let stderr = child.stderr.take().unwrap();
+
+    send_command(&mut stdin, &mut stdout_reader, "content update", Some("connected"));
 
     let script_log_parser: Regex = Regex::new(r"^dbg: \[script] \[(?P<script_id>\d+)] (?P<log>.+)$").unwrap();
     let lines = BufReader::new(stderr).lines();
     for line in lines.map(|l| l.unwrap()) {
-        println!("{}", line);
+        println!("OPENTTD STDERR: {}", line);
         const SCRIPT_LOG_MARKER: &str = "dbg: [script]";
         if line.starts_with(SCRIPT_LOG_MARKER) {
             let captures = script_log_parser.captures(line.as_str())
@@ -172,14 +176,10 @@ fn spawn_openttd_process(work_dir: &Path) -> Child {
         .arg(&config_path.into_os_string())
         .current_dir(work_dir)
         .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
         .expect("Failed to run openttd binary");
-}
-
-fn random_password() -> String {
-    let mut rng = thread_rng();
-    return (0..256).map(|_| char::from(rng.gen_range(65..91))).collect();
 }
 
 fn split_corporation_name(log: &str) -> (&str, &str) {
